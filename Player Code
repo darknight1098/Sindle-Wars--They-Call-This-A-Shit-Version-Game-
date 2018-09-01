@@ -1,19 +1,86 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class MainMenu : MonoBehaviour {
+public class Player : MonoBehaviour {
 
-	public void PlayGame ()
-	{
-		SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex + 1);
+	public float movementspeed;
+	public GameObject camera;
+
+	public GameObject playerObj;
+
+	public GameObject player;
+
+	public GameObject bulletSpawnPoint;
+	public float waitTime;
+
+	public float points;
+
+	public GameObject bullet;
+	private Transform bulletSpawned;
+
+	public float maxHealth;
+	public float health;
+
+	// Use this for initialization
+	void Start () {
+			
 	}
+	
+	// Update is called once per frame
+	void Update () {
+		Plane playerPlane = new Plane (Vector3.up, transform.position);
+		Ray ray = UnityEngine.Camera.main.ScreenPointToRay (Input.mousePosition);
+		float hitDist = 0.0f;
+
+		if (playerPlane.Raycast (ray, out hitDist))
+			
+		{
+			Vector3 targetPoint = ray.GetPoint (hitDist);
+			Quaternion targetRotation = Quaternion.LookRotation (targetPoint - transform.position);
+			targetPoint.x = 0;
+			targetPoint.z = 0;
+			playerObj.transform.rotation = Quaternion.Slerp (transform.rotation, targetRotation, 7f * Time.deltaTime);
+		}
+		if (Input.GetKey (KeyCode.W))
+			transform.Translate (Vector3.forward * movementspeed * Time.deltaTime);
 		
-	public void QuitGame ()
+		if (Input.GetKey (KeyCode.A))
+			transform.Translate (Vector3.left * movementspeed * Time.deltaTime);
+
+		if (Input.GetKey (KeyCode.S))
+			transform.Translate (Vector3.back * movementspeed * Time.deltaTime);
+
+		if (Input.GetKey (KeyCode.D))
+			transform.Translate (Vector3.right * movementspeed * Time.deltaTime);
+
+		//Shootting
+		if (Input.GetMouseButtonDown (0)) 
+		{
+			Shoot (); 
+		}
+
+		if(health <= 0)
+			Die ();
+	
+	}	
+
+	public void Die()
 	{
-		Debug.Log ("QUIT!");  
-		Application.Quit ();
+		Destroy (this.gameObject);
+
+		player.GetComponent<Player> ().points += pointsToGive;
 	}
+
+
+		void Shoot()
+		{
+		bulletSpawned = Instantiate(bullet.transform, bulletSpawnPoint.transform.position, Quaternion.identity);
+		bulletSpawned.rotation = bulletSpawnPoint.transform.rotation;
+	}
+
+
+	
+
 
 }
